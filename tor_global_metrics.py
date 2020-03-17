@@ -1,0 +1,144 @@
+import time
+import os
+import socket
+import IP2Location
+from zipfile import ZipFile
+import tarfile
+
+import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+
+def get_tor_session():
+    session = requests.session()
+    tor_port = 9150
+    # Tor uses the 9050 port as the default socks port
+    session.proxies = {'http':  'socks5://127.0.0.1:{}'.format(tor_port),
+					   'https': 'socks5://127.0.0.1:{}'.format(tor_port)}
+    return session
+
+def get_regular_session():
+    session = requests.session()
+    return session
+
+def init(df): 
+    tor_session = get_tor_session()
+    reg_session = get_regular_session()
+	
+    df = make_requests(tor_session, reg_session, df)
+    print("results")
+    print(df)
+
+def make_requests(tor_session, reg_session, df) :
+    database = IP2Location.IP2Location("IP2LOCATION-LITE-DB11.BIN")
+
+    data = {'ip': [], 'url' : [] , "time" : [], "elapsed_time" : [], "type": [], "geo": []}
+    count = 0
+    df = df.sample(frac=1)
+    for url in df["Domain"][0:20]: 
+        count+=1
+        print("\ncount:", count)
+        full_url="http://"+url
+        print("url:", url)
+        try:
+            ip = (socket.gethostbyname(url))
+            rec = database.get_all(ip)
+            print("rec.country_long:", rec.country_long)
+            print("rec.region:", rec.region)
+            print("rec.city:", rec.city)
+            print("rec.latitude:", rec.latitude)
+            print("rec.longitude:", rec.longitude)
+            print("rec.zipcode:", rec.zipcode)
+            print("rec.timezone:", rec.timezone)
+        except:
+            ip = None
+            rec = None
+
+        # regular
+        try:
+            start = time.time()
+            reg_req = reg_session.get(full_url)
+            end = time.time()
+            tor_req_time = reg_req.elapsed.total_seconds()
+            elapsed_time = end-start
+            data['url'].append(url)
+            data['time'].append(tor_req_time)
+            data['elapsed_time'].append(elapsed_time)
+            data['type'].append('regular')
+            data['ip'].append(ip)
+            data['geo'].append(rec)
+            print("reg_req.elapsed.total_seconds():", tor_req_time)
+            print("regular_elapsed_time:", elapsed_time)
+        except:
+            data['url'].append(url)
+            data['time'].append(None)
+            data['elapsed_time'].append(None)
+            data['type'].append('regular')
+            data['ip'].append(ip)
+            data['geo'].append(rec)
+
+
+        # tor
+        try: 
+            start = time.time()
+            tor_req = tor_session.get(full_url)
+            end = time.time()
+            tor_req_time = tor_req.elapsed.total_seconds()
+            elapsed_time = end-start
+            data['url'].append(url)
+            data['time'].append(tor_req_time)
+            data['elapsed_time'].append(elapsed_time)
+            data['type'].append('tor')
+            data['ip'].append(ip)
+            data['geo'].append(rec)
+            print("tor_req.elapsed.total_seconds():", tor_req_time)
+            print("tor_elapsed_time:", elapsed_time)
+        except: 
+            data['url'].append(url)
+            data['time'].append(None)
+            data['elapsed_time'].append(None)
+            data['type'].append('tor')
+            data['ip'].append(ip)
+            data['geo'].append(rec)
+           
+    return pd.DataFrame(data)
+
+
+def get_data():
+    filename = "top10milliondomains"
+    extract(filename, 'csv')
+    csv_filename = filename+".csv"
+    db_filename = "IP2LOCATION-LITE-DB11"
+    extract(db_filename, "BIN")
+    bin_db_filename = db_filename+".BIN"
+    df = read_data(csv_filename)
+    print("df:", df)
+    print("list(df.columns.values):", list(df.columns.values))
+    print(df["Domain"])
+    return df
+
+def extract(filename, data_type):
+    extract_filename = filename+"."+data_type
+    tar_filename = filename+".tar"
+    zip_filename = filename+".zip"
+
+    if not os.path.exists(extract_filename):
+        '''
+        tf = tarfile.open(tar_filename)
+        tf.extractall()
+        '''
+        with ZipFile(zip_filename) as zipObj:
+            # Extract all the contents of zip file in current directory
+            zipObj.extractall()
+
+
+def read_data(filename):
+    website_df = pd.read_csv(filename)
+    return website_df
+
+if __name__ == '__main__':
+    df = get_data()
+    init(df)
+

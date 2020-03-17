@@ -3,6 +3,7 @@ certifi==2019.11.28
 chardet==3.0.4
 cycler==0.10.0
 idna==2.9
+IP2Location==8.4.1 
 isort==4.3.21
 kiwisolver==1.1.0
 lazy-object-proxy==1.4.3
@@ -25,3 +26,4 @@ stem==1.8.0
 typed-ast==1.4.1
 urllib3==1.25.8
 wrapt==1.11.2
+
