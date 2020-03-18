@@ -161,18 +161,22 @@ def extract(filename, data_type):
 
 
 def get_c_codes():
-    df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv')
-    print("df")
-    print(df)
-    print("df[df['COUNTRY'].str.startswith('U')")
-    print(df[df['COUNTRY'].str.startswith("U")])
-    c_codes_df = df.drop_duplicates(subset=['COUNTRY','CODE'])
-    c_codes_df = c_codes_df[['COUNTRY','CODE']]
-    #c_codes_df = df.groupby('CODE')[['COUNTRY', 'CODE']].count()
-    c_codes_df = c_codes_df.rename(columns={"COUNTRY": "country", "CODE": "country_code"})
-    c_codes_df.to_csv('c_codes_df.csv')
-    print("dc_codes_df:", c_codes_df )
+    if not path.exists('c_codes_df.csv'):
+        df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv')
+        print("df")
+        print(df)
+        print("df[df['COUNTRY'].str.startswith('U')")
+        print(df[df['COUNTRY'].str.startswith("U")])
+        c_codes_df = df.drop_duplicates(subset=['COUNTRY','CODE'])
+        c_codes_df = c_codes_df[['COUNTRY','CODE']]
+        #c_codes_df = df.groupby('CODE')[['COUNTRY', 'CODE']].count()
+        c_codes_df = c_codes_df.rename(columns={"COUNTRY": "country", "CODE": "country_code"})
+        c_codes_df.to_csv('c_codes_df.csv')
+        print("dc_codes_df:", c_codes_df )
+    else:
+        c_codes_df = pd.read_csv('c_codes_df.csv') 
 
+    return c_codes_df
 
 def dead_zones_viz(df):
 
@@ -188,9 +192,8 @@ def dead_zones_viz(df):
     grouped_counts = dead_zones_df.groupby(['country']).country_code.count()
     grouped_df = dead_zones_df.groupby(['country'])
 
-    if not path.exists('c_codes_df.csv'):
-        get_c_codes()
-    c_codes_df = pd.read_csv('c_codes_df.csv') 
+
+    c_codes_df = get_c_codes()
     c_unique = c_codes_df.drop_duplicates(subset=['country_code', "country"])
     df_unique = df.drop_duplicates(subset=['country_code', "country"])
     code_dict = {}
@@ -256,9 +259,7 @@ def map_viz(df):
     print("map_df['elapsed_time']")
     print(map_df['elapsed_time'])
 
-    if not path.exists('c_codes_df.csv'):
-        get_c_codes()
-    c_codes_df = pd.read_csv('c_codes_df.csv') 
+    c_codes_df = get_c_codes()
     c_unique = c_codes_df.drop_duplicates(subset=['country_code', "country"])
     df_unique = df.drop_duplicates(subset=['country_code', "country"])
     code_dict = {}
