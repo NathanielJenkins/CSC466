@@ -1,5 +1,10 @@
 import time
 import os
+from pathlib import Path
+import os.path
+from os import path
+import sys
+import time
 import socket
 import IP2Location
 from zipfile import ZipFile
@@ -10,6 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+data_dir ="data"
 
 def get_tor_session():
     session = requests.session()
@@ -32,7 +38,7 @@ def init(df):
     print(df)
 
 def make_requests(tor_session, reg_session, df) :
-    database = IP2Location.IP2Location("IP2LOCATION-LITE-DB11.BIN")
+    database = read_bin("IP2LOCATION-LITE-DB11.BIN")
 
     data = {'ip': [], 'url' : [] , "time" : [], "elapsed_time" : [], "type": [], "geo": []}
     count = 0
@@ -120,23 +126,43 @@ def get_data():
     return df
 
 def extract(filename, data_type):
-    extract_filename = filename+"."+data_type
-    tar_filename = filename+".tar"
-    zip_filename = filename+".zip"
+    extract_filename =  Path.cwd().joinpath(data_dir, filename+"."+data_type)
+    #tar_filename = data_dir+"/"+filename+".tar"
+    zip_filename =  Path.cwd().joinpath(data_dir, filename+".zip")
 
-    if not os.path.exists(extract_filename):
+    if not os.path.exists(extract_filename.absolute()):
         '''
         tf = tarfile.open(tar_filename)
         tf.extractall()
         '''
-        with ZipFile(zip_filename) as zipObj:
+        with ZipFile(zip_filename.absolute()) as zipObj:
             # Extract all the contents of zip file in current directory
-            zipObj.extractall()
+            zipObj.extractall(path=data_dir)
 
 
-def read_data(filename):
-    website_df = pd.read_csv(filename)
-    return website_df
+
+def read_data(filename, inDataDir=True):
+    path =  Path.cwd().joinpath(data_dir, filename)
+    if not inDataDir:
+        path = filename
+    df = pd.read_csv(path)
+    return df
+
+def read_bin(filename, inDataDir=True):
+    path =  Path.cwd().joinpath(data_dir, filename)
+    if not inDataDir:
+        path = filename
+    database = IP2Location.IP2Location(path)
+    return database
+
+def write_csv(df, filename):
+    path = data_dir+'/'+filename
+    df.to_csv(path)
+    return df
+
+def write_image(fig, filename):
+    path = data_dir+'/'+filename
+    fig.write_image(path)
 
 if __name__ == '__main__':
     df = get_data()
