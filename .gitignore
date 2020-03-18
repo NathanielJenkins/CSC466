@@ -1,2 +1,11 @@
 *.csv
 *.BIN
+*.html
+*.~lock.*
+*.eps
+*.jpeg
+*.jpg
+*.pdf
+*.png
+*.svg
+*.webp
