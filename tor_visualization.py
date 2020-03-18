@@ -1,3 +1,4 @@
+from pathlib import Path
 import os.path
 from os import path
 import sys
@@ -17,7 +18,8 @@ import plotly.graph_objects as go
 import plotly.io
 
 
-
+data_dir ="data"
+c_codes_file = "c_codes_df.csv"
 
 def get_tor_session():
     session = requests.session()
@@ -82,7 +84,8 @@ def append_data(data, url, tor_req_time, elapsed_time, type, ip, rec):
 
 
 def make_requests(tor_session, reg_session, df, num_of_records) :
-    database = IP2Location.IP2Location("IP2LOCATION-LITE-DB11.BIN")
+    database = read_bin("IP2LOCATION-LITE-DB11.BIN")
+
 
     data = {'ip': [], 'url' : [] , "time" : [], "elapsed_time" : [], "type": [], "geo": [], "rec": [],
     "country": [], "country_code": [], "region": [], "city": [], "latitude": [], "longitude": [],
@@ -144,25 +147,26 @@ def get_data():
     return df
 
 def extract(filename, data_type):
-    extract_filename = filename+"."+data_type
-    tar_filename = filename+".tar"
-    zip_filename = filename+".zip"
+    extract_filename =  Path.cwd().joinpath(data_dir, filename+"."+data_type)
+    #tar_filename = data_dir+"/"+filename+".tar"
+    zip_filename =  Path.cwd().joinpath(data_dir, filename+".zip")
 
-    if not os.path.exists(extract_filename):
+    if not os.path.exists(extract_filename.absolute()):
         '''
         tf = tarfile.open(tar_filename)
         tf.extractall()
         '''
-        with ZipFile(zip_filename) as zipObj:
+        with ZipFile(zip_filename.absolute()) as zipObj:
             # Extract all the contents of zip file in current directory
-            zipObj.extractall()
+            zipObj.extractall(path=data_dir)
 
 
 
 
 def get_c_codes():
-    if not path.exists('c_codes_df.csv'):
-        df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv')
+    c_codes_filename =  Path.cwd().joinpath(data_dir, c_codes_file)
+    if not path.exists(c_codes_filename.absolute()):
+        df = read_data('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv', False)
         print("df")
         print(df)
         print("df[df['COUNTRY'].str.startswith('U')")
@@ -171,10 +175,10 @@ def get_c_codes():
         c_codes_df = c_codes_df[['COUNTRY','CODE']]
         #c_codes_df = df.groupby('CODE')[['COUNTRY', 'CODE']].count()
         c_codes_df = c_codes_df.rename(columns={"COUNTRY": "country", "CODE": "country_code"})
-        c_codes_df.to_csv('c_codes_df.csv')
+        write_csv(c_codes_df, 'c_codes_df.csv')
         print("dc_codes_df:", c_codes_df )
     else:
-        c_codes_df = pd.read_csv('c_codes_df.csv') 
+        c_codes_df = read_data(c_codes_file) 
 
     return c_codes_df
 
@@ -185,22 +189,21 @@ def dead_zones_viz(df):
     map_df.dropna(subset=['rec'])
     dead_zones_df = map_df[map_df['elapsed_time'].isna()]
     dead_zones_df['country_code'] = dead_zones_df['country'].str[:3].str.upper()
-    dead_zones_df.to_csv('dead_zones_df.csv')
+    write_csv(dead_zones_df, 'dead_zones_df.csv')
     map_df['count'] = map_df.groupby('country_code')['country_code'].transform('count')
     z_values = pd.Series( (map_df['count']) )
-    BEL_Total = dead_zones_df[dead_zones_df.country_code == "BEL"].size
-    grouped_counts = dead_zones_df.groupby(['country']).country_code.count()
-    grouped_df = dead_zones_df.groupby(['country'])
+    #BEL_Total = dead_zones_df[dead_zones_df.country_code == "BEL"].size
+    #grouped_counts = dead_zones_df.groupby(['country']).country_code.count()
+    #grouped_df = dead_zones_df.groupby(['country'])
 
 
     c_codes_df = get_c_codes()
     c_unique = c_codes_df.drop_duplicates(subset=['country_code', "country"])
-    df_unique = df.drop_duplicates(subset=['country_code', "country"])
+    #df_unique = df.drop_duplicates(subset=['country_code', "country"])
     code_dict = {}
     for index, row in c_unique.iterrows():
         country = row.country
         df_code = country[:3].upper()
-        c_code = row.country_code
         code_dict[df_code] = row.country_code
 
   
@@ -249,8 +252,8 @@ def map_viz(df):
     map_df = map_df[map_df.notna()]
     map_df = map_df.dropna()
     map_df['country_code'] = map_df['country'].str[:3].str.upper()
-    mean = df["elapsed_time"].mean()
-    std =  df["elapsed_time"].std()
+    #mean = df["elapsed_time"].mean()
+    #std =  df["elapsed_time"].std()
 
 
     map_df = map_df[map_df['elapsed_time'] < map_df['elapsed_time'].quantile(.80)]
@@ -261,19 +264,18 @@ def map_viz(df):
 
     c_codes_df = get_c_codes()
     c_unique = c_codes_df.drop_duplicates(subset=['country_code', "country"])
-    df_unique = df.drop_duplicates(subset=['country_code', "country"])
+    #df_unique = df.drop_duplicates(subset=['country_code', "country"])
     code_dict = {}
     for index, row in c_unique.iterrows():
         country = row.country
         df_code = country[:3].upper()
-        c_code = row.country_code
         code_dict[df_code] = row.country_code
 
   
 
     map_df['country_code'] = map_df['country_code'].map(code_dict)
 
-    map_df.to_csv('map_df.csv')
+    write_csv(map_df, 'map_df.csv')
     fig = go.Figure(data=go.Choropleth(
         locations = map_df['country_code'],
         z = map_df['elapsed_time'],
@@ -309,9 +311,28 @@ def map_viz(df):
 
 
 
-def read_data(filename):
-    website_df = pd.read_csv(filename)
-    return website_df
+def read_data(filename, inDataDir=True):
+    path =  Path.cwd().joinpath(data_dir, filename)
+    if not inDataDir:
+        path = filename
+    df = pd.read_csv(path)
+    return df
+
+def read_bin(filename, inDataDir=True):
+    path =  Path.cwd().joinpath(data_dir, filename)
+    if not inDataDir:
+        path = filename
+    database = IP2Location.IP2Location(path)
+    return database
+
+def write_csv(df, filename):
+    path = data_dir+'/'+filename
+    df.to_csv(path)
+    return df
+
+def write_image(fig, filename):
+    path = data_dir+'/'+filename
+    fig.write_image(path)
 
 
 def handle_args():
@@ -367,7 +388,7 @@ if __name__ == '__main__':
     if '--resume' in arg_dict:
         if(arg_dict['--resume'] == 'true'):
             resume = True
-            df = pd.read_csv(output_filename) 
+            df = read_data(output_filename) 
 
     if '--test_size' in arg_dict:
         if(arg_dict['--test_size'].isdigit()):
@@ -380,7 +401,7 @@ if __name__ == '__main__':
         print("final data")
         print(df)
         print(df.columns)
-        df.to_csv(output_filename)
+        write_csv(df, output_filename)
 
 
     fig = map_viz(df)
@@ -410,7 +431,7 @@ if __name__ == '__main__':
 
 
     if save==True:
-        fig.write_image(outfile)
+        write_image(fig, outfile)
 
 
 
