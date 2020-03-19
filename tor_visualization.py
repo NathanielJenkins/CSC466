@@ -256,6 +256,22 @@ def map_viz(df):
     print("map_df['elapsed_time']")
     print(map_df['elapsed_time'])
 
+    if not path.exists('c_codes_df.csv'):
+        get_c_codes()
+    c_codes_df = pd.read_csv('c_codes_df.csv') 
+    c_unique = c_codes_df.drop_duplicates(subset=['country_code', "country"])
+    df_unique = df.drop_duplicates(subset=['country_code', "country"])
+    code_dict = {}
+    for index, row in c_unique.iterrows():
+        country = row.country
+        df_code = country[:3].upper()
+        c_code = row.country_code
+        code_dict[df_code] = row.country_code
+
+  
+
+    map_df['country_code'] = map_df['country_code'].map(code_dict)
+
     map_df.to_csv('map_df.csv')
     fig = go.Figure(data=go.Choropleth(
         locations = map_df['country_code'],
