@@ -432,10 +432,7 @@ if __name__ == '__main__':
     resume = False
     test_size = False
     size = 50
-
-    df = read_data(output_filename) 
-    dead_zone_ratios_viz(df)
-
+    
     if '--resume' in arg_dict:
         if(arg_dict['--resume'] == 'true'):
             resume = True
