@@ -46,3 +46,5 @@ six==1.14.0
 tornado==6.0.4
 typing-extensions==3.7.4.1
 urllib3==1.25.8
+stem==1.8.0
+
