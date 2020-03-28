@@ -195,13 +195,13 @@ def wipe_data():
 def handle_args():
     usage_err_msg = """\n ARGUMENTS ERROR \n\n 
     usage:  \n 
-    'python tor_visualization.py --resume false' fetch new data to graph \n \n  
-    'python tor_visualization.py --test_size 100' will plot x amount of the results from different .onion sites \n \n 
-    'python tor_visualization.py --save true' will save the graph to a file \n \n 
-    'python tor_visualization.py --outfile mygraph.png' will save the graph to a file called  mygraph.png  \n \n 
-    'python tor_visualization.py --display false' will prevent the visualization from being hosted on localhost \n \n 
-    'python tor_visualization.py --mode lines' will display the results on a line plot \n \n
-    'python tor_visualization.py --clear true' will clear all the stored data \n \n
+    'python dark_side.py --resume false' fetch new data to graph \n \n  
+    'python dark_side.py --test_size 100' will plot x amount of the results from different .onion sites \n \n 
+    'python dark_side.py --save true' will save the graph to a file \n \n 
+    'python dark_side.py --outfile mygraph.png' will save the graph to a file called  mygraph.png  \n \n 
+    'python dark_side.py --display false' will prevent the visualization from being hosted on localhost \n \n 
+    'python dark_side.py --mode lines' will display the results on a line plot \n \n
+    'python dark_side.py --clear true' will clear all the stored data \n \n
     """ 
     arguments = len(sys.argv) - 1
     print("arguments:", arguments)
@@ -225,14 +225,14 @@ def handle_args():
 
 """
 usage:  
-'python tor_visualization.py --resume true' fetch new data to graph
-'python tor_visualization.py --test_size 100' will plot x amount of the results from different .onion sites 
-'python tor_visualization.py --save true' will save the graph to a file
-'python tor_visualization.py --outfile mygraph.png' will save the graph to a file called  mygraph.png 
-'python tor_visualization.py --display false' will prevent the visualization from being hosted on localhost
-'python tor_visualization.py --resume true --mode line_plot' will display the results on a line_plot
-'python tor_visualization.py --mode lines' will display the results on a line plot 
-'python tor_visualization.py --clear true' will clear all the stored data
+'python dark_side.py --resume true' fetch new data to graph
+'python dark_side.py --test_size 100' will plot x amount of the results from different .onion sites 
+'python dark_side.py --save true' will save the graph to a file
+'python dark_side.py --outfile mygraph.png' will save the graph to a file called  mygraph.png 
+'python dark_side.py --display false' will prevent the visualization from being hosted on localhost
+'python dark_side.py --resume true --mode line_plot' will display the results on a line_plot
+'python dark_side.py --mode lines' will display the results on a line plot 
+'python dark_side.py --clear true' will clear all the stored data
 """ 
 if __name__=='__main__':
     arg_dict = handle_args()
