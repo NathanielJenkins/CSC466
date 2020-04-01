@@ -96,10 +96,14 @@ def dark_crawl(fetch_size=50):
         #links = random.shuffle(onion_links)
         print(onion_hub_links)
         total_amount = len(onion_hub_links)
+        if fetch_size == -1:
+            fetch_size = total_amount
+
         count = -1
         for web_url in onion_hub_links[0:fetch_size]:
             count += 1
             print("count:", count)
+            print("fetch_size:", fetch_size)
             print("total_amount:", total_amount)
             try: 
                 full_url = "http://"+web_url+"/"
@@ -116,11 +120,9 @@ def dark_crawl(fetch_size=50):
                 write_data(metrics, metrics_file)
                 write_data(html_data_string, filename, dirPath=html_dir)
                 
-
-             
-
             except Exception as err:
                 print(Exception, err)
+                
 
 
 def init_stem():
@@ -233,28 +235,42 @@ usage:
 'python dark_side.py --resume true --mode line_plot' will display the results on a line_plot
 'python dark_side.py --mode lines' will display the results on a line plot 
 'python dark_side.py --clear true' will clear all the stored data
+'python dark_side.py --fetch_all true' will fetch all onion links
 """ 
 if __name__=='__main__':
     arg_dict = handle_args()
     print("arg_dict")
     print(arg_dict)
 
+    #Default Arguments
     resume = True
+    display = True
+    save = False
+    fetch_size = 30
+    sample_size = 20
+    mode = 'markers'
+    outfile = "onion_graph.png"
+    fetch_all = False
+
+
+    check_paths()
+
     if '--clear' in arg_dict:
         if (arg_dict['--clear'] == 'true'):
             wipe_data()
             resume = False
 
-
-    check_paths()
     if '--resume' in arg_dict:
         if (arg_dict['--resume'] == 'false'):
             resume = False
 
-    fetch_size = 30
     if '--fetch_size' in arg_dict:
         if(arg_dict['--fetch_size'].isdigit()):
             fetch_size = int(arg_dict['--fetch_size'])
+
+    if '--fetch_all' in arg_dict:
+        if (arg_dict['--fetch_all'] == 'true'):
+            fetch_size = -1
 
     if not resume:
         init_stem()
@@ -263,12 +279,11 @@ if __name__=='__main__':
     metrics = analyze_results()
     metrics = metrics.split("~")
     print("metrics:", metrics)
-    sample_size = 20
     if '--test_size' in arg_dict:
         if(arg_dict['--test_size'].isdigit()):
             sample_size = int(arg_dict['--test_size'])
 
-    mode = 'markers'
+
     if '--mode' in arg_dict:
         if(arg_dict['--mode'] == 'lines'):
             mode = 'lines'
@@ -277,9 +292,6 @@ if __name__=='__main__':
 
     fig = plot_data(metrics, sample_size, mode=mode)
 
-    display = True
-    save = False
-    outfile = "onion_graph.png"
     if '--display' in arg_dict:
         if(arg_dict['--display'] == 'false'):
             display = False
