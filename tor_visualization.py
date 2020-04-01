@@ -425,13 +425,18 @@ usage:
 '''
 
 if __name__ == '__main__':
-    output_filename = 'map_data.csv'
     arg_dict = handle_args()
     print("arg_dict")
     print(arg_dict)
+
+    #default arguments
+    output_filename = 'map_data.csv'
     resume = False
     test_size = False
     size = 50
+    display = True
+    save = False
+    outfile = "tor_map.png"
     
     if '--resume' in arg_dict:
         if(arg_dict['--resume'] == 'true'):
@@ -458,9 +463,6 @@ if __name__ == '__main__':
         if(arg_dict['--mode'] == 'dead_zone_ratios'):
             fig = dead_zone_ratios_viz(df)
 
-    display = True
-    save = False
-    outfile = "tor_map.png"
     if '--display' in arg_dict:
         if(arg_dict['--display'] == 'false'):
             display = False
