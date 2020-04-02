@@ -293,10 +293,12 @@ if __name__=='__main__':
     if '--fetch_size' in arg_dict:
         if(arg_dict['--fetch_size'].isdigit()):
             fetch_size = int(arg_dict['--fetch_size'])
+            resume = False
 
     if '--fetch_all' in arg_dict:
         if (arg_dict['--fetch_all'] == 'true'):
             fetch_size = -1
+            resume = False
 
     if not resume:
         init_stem()
