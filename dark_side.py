@@ -176,7 +176,7 @@ def plot_data(metrics, sample_size=20, mode='markers'):
     print("mode", mode)
     if(mode=='all'):
         return plot_all_results(metrics)
-        
+
     print("len(metrics):", len(metrics))
     print("metrics:", metrics)
     random.shuffle(metrics)
@@ -227,6 +227,8 @@ def handle_args():
     'python dark_side.py --display false' will prevent the visualization from being hosted on localhost \n \n 
     'python dark_side.py --mode lines' will display the results on a line plot \n \n
     'python dark_side.py --clear true' will clear all the stored data \n \n
+    'python dark_side.py --fetch_all true' will crawl all the ~550 .onion sites \n \n
+    'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites \n \n
     """ 
     arguments = len(sys.argv) - 1
     print("arguments:", arguments)
@@ -259,6 +261,7 @@ usage:
 'python dark_side.py --mode lines' will display the results on a line plot 
 'python dark_side.py --clear true' will clear all the stored data
 'python dark_side.py --fetch_all true' will fetch all onion links
+'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites
 """ 
 if __name__=='__main__':
     arg_dict = handle_args()
