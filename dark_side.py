@@ -6,11 +6,13 @@ import re
 import numpy as np
 import random
 import os
-import plotly.graph_objects as go
 import shutil
+import pandas as pd
+
+import plotly.graph_objects as go
+import plotly.express as px
 
 import math
-
 
 #Importing Stem libraries
 from stem import Signal
@@ -128,7 +130,7 @@ def dark_crawl(fetch_size=50):
 def init_stem():
     #Initiating Connection
     with Controller.from_port(port=9051) as controller:
-        controller.authenticate("16:95A1A7A9D14B5F216054930577B2E77C206A3FCA654F7546555FA26A94 \\n")
+        controller.authenticate()
         controller.signal(Signal.NEWNYM)
 
     # TOR SETUP GLOBAL Vars
@@ -151,9 +153,30 @@ def analyze_results():
 
 
 
+def plot_all_results(metrics):
+    random.shuffle(metrics)
+    y = []
+    x_labels = []
+    for metric in metrics:
+        vals = metric.split(":")
+        if len(vals) > 1:
+            y.append(float(vals[1]))
+            x_labels.append(vals[0].split(".")[0])
+
+    x = np.arange(len(y))
+    d = {"time(seconds)": y, "website": x_labels}
+    df = pd.DataFrame(data=d)
+    print("len(x_labels):", len(x_labels))
+    fig = px.scatter(df, x="time(seconds)", y="website")
+    return fig
+
 
 
 def plot_data(metrics, sample_size=20, mode='markers'):
+    print("mode", mode)
+    if(mode=='all'):
+        return plot_all_results(metrics)
+        
     print("len(metrics):", len(metrics))
     print("metrics:", metrics)
     random.shuffle(metrics)
@@ -289,6 +312,8 @@ if __name__=='__main__':
             mode = 'lines'
         if(arg_dict['--mode'] == 'scatter_plot'):
             mode = 'scatter_plot'
+        if(arg_dict['--mode'] == 'all'):
+            mode = 'all'
 
     fig = plot_data(metrics, sample_size, mode=mode)
 
