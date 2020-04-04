@@ -233,7 +233,7 @@ def handle_args():
     arguments = len(sys.argv) - 1
     print("arguments:", arguments)
     arg_dict = {}
-    if( arguments % 2 != 0):
+    if( arguments % 2 != 0 ):
         print(usage_err_msg)
         exit(0)
     

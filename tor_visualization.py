@@ -33,11 +33,11 @@ def get_regular_session():
     session = requests.session()
     return session
 
-def init(df, number_of_records): 
+def init(df, number_of_records, timeout): 
     tor_session = get_tor_session()
     reg_session = get_regular_session()
 	
-    df = make_requests(tor_session, reg_session, df, number_of_records)
+    df = make_requests(tor_session, reg_session, df, number_of_records, timeout)
     print("results")
     print(df)
     return df
@@ -83,7 +83,7 @@ def append_data(data, url, tor_req_time, elapsed_time, type, ip, rec):
     return data
 
 
-def make_requests(tor_session, reg_session, df, num_of_records) :
+def make_requests(tor_session, reg_session, df, num_of_records, timeout) :
     database = read_bin("IP2LOCATION-LITE-DB11.BIN")
 
 
@@ -107,7 +107,7 @@ def make_requests(tor_session, reg_session, df, num_of_records) :
         # regular
         try:
             start = time.time()
-            reg_req = reg_session.get(full_url)
+            reg_req = reg_session.get(full_url, timeout=timeout)
             end = time.time()
             tor_req_time = reg_req.elapsed.total_seconds()
             elapsed_time = end-start
@@ -120,7 +120,7 @@ def make_requests(tor_session, reg_session, df, num_of_records) :
         # tor
         try: 
             start = time.time()
-            tor_req = tor_session.get(full_url)
+            tor_req = tor_session.get(full_url, timeout=timeout)
             end = time.time()
             tor_req_time = tor_req.elapsed.total_seconds()
             elapsed_time = end-start
@@ -393,6 +393,7 @@ def handle_args():
     'python tor_visualization.py --display false' will prevent the visualization from being hosted on localhost \n \n 
     'python tor_visualization.py --resume true --mode dead_zones' will display the zones where the Tor network could not connect to a server \n \n
     'python tor_visualization.py --resume true --mode dead_zone_ratios' will display the ratio of connections to dropped connections per region\n \n
+    'python tor_visualization.py --timeout 50' set a timeout of 50 seconds on the requests \n\n
     """ 
     arguments = len(sys.argv) - 1
     print("arguments:", arguments)
@@ -422,6 +423,7 @@ usage:
     'python tor_visualization.py --display false will prevent the visualization from being hosted on localhost 
     'python tor_visualization.py --resume true --mode dead_zones'
     'python tor_visualization.py --resume true --mode dead_zone_ratios' will display the ratio of connections to dropped connections per region
+    'python tor_visualization.py --timeout 50' set a timeout of 50 seconds on the requests
 '''
 
 if __name__ == '__main__':
@@ -432,11 +434,11 @@ if __name__ == '__main__':
     #default arguments
     output_filename = 'map_data.csv'
     resume = False
-    test_size = False
-    size = 50
+    test_size = 50
     display = True
     save = False
     outfile = "tor_map.png"
+    timeout=200
     
     if '--resume' in arg_dict:
         if(arg_dict['--resume'] == 'true'):
@@ -445,12 +447,15 @@ if __name__ == '__main__':
 
     if '--test_size' in arg_dict:
         if(arg_dict['--test_size'].isdigit()):
-            test_size = True
-            size = int(arg_dict['--test_size'])
+            test_size = int(arg_dict['--test_size'])
+
+    if '--timeout' in arg_dict:
+        if(arg_dict['--timeout'].isdigit()):
+            timeout = int(arg_dict['--test_size'])
 
     if resume == False:
         df = get_data()
-        df = init(df, size)
+        df = init(df, test_size, timeout)
         print("final data")
         print(df)
         print(df.columns)
