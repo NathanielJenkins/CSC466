@@ -87,7 +87,7 @@ def call_onion_hub():
     return onion_links
 
 
-def dark_crawl(fetch_size=50):
+def dark_crawl(fetch_size=50, timeout=300):
 
         onion_hub_links = call_onion_hub()
         print("len(onion_hub_links):", len(onion_hub_links))
@@ -110,7 +110,7 @@ def dark_crawl(fetch_size=50):
             try: 
                 full_url = "http://"+web_url+"/"
                 start_time = time.time()
-                received_response = urlopen(full_url)
+                received_response = urlopen(full_url, timeout=timeout)
                 if 'text/html' in received_response.getheader('Content-Type'):
                     data_bytes = received_response.read()
                     html_data_string = data_bytes.decode("latin-1")
@@ -229,6 +229,7 @@ def handle_args():
     'python dark_side.py --clear true' will clear all the stored data \n \n
     'python dark_side.py --fetch_all true' will crawl all the ~550 .onion sites \n \n
     'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites \n \n
+    'python dark_side.py --timeout 100' will set the timeout for the request to 100 seconds \n \n
     """ 
     arguments = len(sys.argv) - 1
     print("arguments:", arguments)
@@ -262,6 +263,7 @@ usage:
 'python dark_side.py --clear true' will clear all the stored data
 'python dark_side.py --fetch_all true' will fetch all onion links
 'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites
+'python dark_side.py --timeout 100' will set the timeout for the request to 100 seconds
 """ 
 if __name__=='__main__':
     arg_dict = handle_args()
@@ -272,11 +274,13 @@ if __name__=='__main__':
     resume = True
     display = True
     save = False
+    timeout = 300
     fetch_size = 30
     sample_size = 20
     mode = 'markers'
     outfile = "onion_graph.png"
     fetch_all = False
+
 
 
     check_paths()
@@ -288,6 +292,11 @@ if __name__=='__main__':
 
     if '--resume' in arg_dict:
         if (arg_dict['--resume'] == 'false'):
+            resume = False
+
+    if '--timeout' in arg_dict:
+        if(arg_dict['--timeout'].isdigit()):
+            timeout = int(arg_dict['--timeout'])
             resume = False
 
     if '--fetch_size' in arg_dict:
@@ -302,7 +311,7 @@ if __name__=='__main__':
 
     if not resume:
         init_stem()
-        dark_crawl(fetch_size)
+        dark_crawl(fetch_size, timeout)
 
     metrics = analyze_results()
     metrics = metrics.split("~")

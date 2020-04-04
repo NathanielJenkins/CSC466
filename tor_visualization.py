@@ -440,6 +440,7 @@ if __name__ == '__main__':
     outfile = "tor_map.png"
     timeout=200
     
+    
     if '--resume' in arg_dict:
         if(arg_dict['--resume'] == 'true'):
             resume = True
