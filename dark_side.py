@@ -164,7 +164,7 @@ def plot_all_results(metrics):
             x_labels.append(vals[0].split(".")[0])
 
     x = np.arange(len(y))
-    title_info = str(len(y))+" Dark Web Sample Requests had a Mean Request Time of "+str(np.mean(y))+" Seconds"
+    title_info = str(len(y))+" Dark Web Sample Requests with a Mean Request Time of "+str(np.mean(y))+" Seconds"
     d = {"time(seconds)": y, "website": x_labels}
     df = pd.DataFrame(data=d)
     print("len(x_labels):", len(x_labels))
@@ -193,17 +193,16 @@ def plot_data(metrics, sample_size=20, mode='markers'):
             y.append(float(vals[1]))
             x_labels.append(vals[0].split(".")[0])
 
-    y_mean_txt = "Mean Request Time:"+str(np.mean(y))
-
+    
+    title = "Random Sample of "+str(len(y))+" Onion Server Requests with a Mean Time of "+str(np.mean(y))+" Seconds"
     x = np.arange(len(y))
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x_labels, y=y,
                     mode=mode,
-                    text=y_mean_txt,
                     name='onion_times'))
 
     fig.update_layout(
-        title="Random Sample of Onion Server Times",
+        title=title,
         xaxis_title="Onion Website Request",
         yaxis_title="Onion Request Elapsed Time (Seconds)",
         font=dict(
