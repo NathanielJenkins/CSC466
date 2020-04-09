@@ -1,29 +1,35 @@
 
 import argparse
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 ds_parser = argparse.ArgumentParser()
 
-ds_parser.add_argument("--fetch_all", type=bool,
+ds_parser.add_argument("--fetch_all", type=str2bool,
                       default=False,
-                      choices=[False, True],
                       help="Fetch all the onion links")
 
-ds_parser.add_argument("--clear", type=bool,
+ds_parser.add_argument("--clear", type=str2bool,
                       default=False,
-                      choices=[False, True],
                       help="Clear all saved data")
 
-ds_parser.add_argument("--resume", type=bool,
+ds_parser.add_argument("--resume", type=str2bool,
                       default=False,
-                      choices=[False, True],
                       help="Visualize already saved data")
 
-ds_parser.add_argument("--display", type=bool,
+ds_parser.add_argument("--display", type=str2bool,
                       default=True,
-                      choices=[False, True],
                       help="Display the graph")
 
-ds_parser.add_argument("--save", type=bool,
+ds_parser.add_argument("--save", type=str2bool,
                       default=True,
                       choices=[False, True],
                       help="Save the graph to a file")

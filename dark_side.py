@@ -57,7 +57,7 @@ def read_data(filename, dirPath=data_dir, mode='r'):
         path = filename
     f = open(path, mode)
     data = f.read()
-    print(data)
+    #print(data)
     return data
 
 def write_data(data, filename, dirPath=data_dir, mode='a'):
@@ -283,8 +283,9 @@ if __name__=='__main__':
         wipe_data()
         config.resume = False
 
+    print("config.fetch_all:", config.fetch_all)
     if config.fetch_all:
-        fetch_size = -1
+        config.fetch_size = -1
         config.resume = False
 
     if not config.resume:
