@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 import math
+from config import get_ds_config
 
 #Importing Stem libraries
 from stem import Signal
@@ -47,6 +48,7 @@ def check_paths():
 
 def write_image(fig, filename):
     path = data_dir+'/'+filename
+    print("path:", path)
     fig.write_image(path)
 
 def read_data(filename, dirPath=data_dir, mode='r'):
@@ -272,88 +274,35 @@ usage:
 'python dark_side.py --timeout 100' will set the timeout for the request to 100 seconds
 """ 
 if __name__=='__main__':
-    arg_dict = handle_args()
-    print("arg_dict")
-    print(arg_dict)
 
-    #Default Arguments
-    resume = True
-    display = True
-    save = False
-    timeout = 300
-    fetch_size = 30
-    sample_size = 20
-    mode = 'markers'
-    outfile = "onion_graph.png"
-    fetch_all = False
-
-
+    config, unparsed = get_ds_config()
 
     check_paths()
 
-    if '--clear' in arg_dict:
-        if (arg_dict['--clear'] == 'true'):
-            wipe_data()
-            resume = False
+    if config.clear:
+        wipe_data()
+        config.resume = False
 
-    if '--resume' in arg_dict:
-        if (arg_dict['--resume'] == 'false'):
-            resume = False
+    if config.fetch_all:
+        fetch_size = -1
+        config.resume = False
 
-    if '--timeout' in arg_dict:
-        if(arg_dict['--timeout'].isdigit()):
-            timeout = int(arg_dict['--timeout'])
-            resume = False
-
-    if '--fetch_size' in arg_dict:
-        if(arg_dict['--fetch_size'].isdigit()):
-            fetch_size = int(arg_dict['--fetch_size'])
-            resume = False
-
-    if '--fetch_all' in arg_dict:
-        if (arg_dict['--fetch_all'] == 'true'):
-            fetch_size = -1
-            resume = False
-
-    if not resume:
+    if not config.resume:
         init_stem()
-        dark_crawl(fetch_size, timeout)
+        dark_crawl(config.fetch_size, config.timeout)
 
     metrics = analyze_results()
     metrics = metrics.split("~")
     print("metrics:", metrics)
-    if '--test_size' in arg_dict:
-        if(arg_dict['--test_size'].isdigit()):
-            sample_size = int(arg_dict['--test_size'])
 
+    fig = plot_data(metrics, config.sample_size, mode=config.mode)
 
-    if '--mode' in arg_dict:
-        if(arg_dict['--mode'] == 'lines'):
-            mode = 'lines'
-        if(arg_dict['--mode'] == 'scatter_plot'):
-            mode = 'scatter_plot'
-        if(arg_dict['--mode'] == 'all'):
-            mode = 'all'
-
-    fig = plot_data(metrics, sample_size, mode=mode)
-
-    if '--display' in arg_dict:
-        if(arg_dict['--display'] == 'false'):
-            display = False
-
-    if '--save' in arg_dict:
-        if(arg_dict['--save'] == 'true'):
-            save = True
-
-    if '--outfile' in arg_dict:
-        outfile = arg_dict['--outfile']
-        save = True
-
-    if display==True:
+    print("config.display:", config.display)
+    if config.display==True:
         fig.show()
 
-    if save==True:
-        write_image(fig, outfile)
+    if config.save==True:
+        write_image(fig, config.outfile)
 
 
 
