@@ -22,7 +22,7 @@ ds_parser.add_argument("--clear", type=str2bool,
                       help="Clear all saved data")
 
 ds_parser.add_argument("--resume", type=str2bool,
-                      default=False,
+                      default=True,
                       help="Visualize already saved data")
 
 ds_parser.add_argument("--display", type=str2bool,

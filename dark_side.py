@@ -106,7 +106,7 @@ def dark_crawl(test_size=50, timeout=300):
         count = -1
         for web_url in onion_hub_links[0:test_size]:
             count += 1
-            print("count:", count)
+            print("\n\ncount:", count)
             print("test_size:", test_size)
             print("total_amount:", total_amount)
             try: 
