@@ -42,7 +42,7 @@ ds_parser.add_argument("--timeout", type=int,
                        default=300,
                        help="Default timeout for trying to connect to a server")
 
-ds_parser.add_argument("--fetch_size", type=int,
+ds_parser.add_argument("--test_size", type=int,
                        default=30,
                        help="Amount of sites to fetch")
 
@@ -56,9 +56,50 @@ ds_parser.add_argument("--mode", type=str,
                        help="Mode to plot the data")
 
 
+tv_parser = argparse.ArgumentParser()
+
+tv_parser.add_argument("--resume", type=str2bool,
+                      default=False,
+                      help="Visualize already saved data")
+
+tv_parser.add_argument("--display", type=str2bool,
+                      default=True,
+                      help="Display the graph")
+
+tv_parser.add_argument("--save", type=str2bool,
+                      default=True,
+                      choices=[False, True],
+                      help="Save the graph to a file")
+
+tv_parser.add_argument("--outfile", type=str,
+                      default="onion_graph.png",
+                      help="filename to save the graph")
+
+tv_parser.add_argument("--output_filename", type=str,
+                      default="map_data.csv",
+                      help="filename to save the map data")
+
+tv_parser.add_argument("--timeout", type=int,
+                       default=300,
+                       help="Default timeout for trying to connect to a server")
+
+tv_parser.add_argument("--test_size", type=int,
+                       default=30,
+                       help="Amount of sites to fetch")
+
+tv_parser.add_argument("--sample_size", type=int,
+                       default=20,
+                       help="Amount of sites to graph")
+
+tv_parser.add_argument("--mode", type=str,
+                       default='default',
+                       choices=['default', 'dead_zones', 'dead_zone_ratios'],
+                       help="Mode to plot the data")
 
 def get_ds_config():
     config, unparsed = ds_parser.parse_known_args()
     return config, unparsed
 
-
+def get_tv_config():
+    config, unparsed = tv_parser.parse_known_args()
+    return config, unparsed

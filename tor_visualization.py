@@ -1,3 +1,4 @@
+from config import get_tv_config
 from pathlib import Path
 import os.path
 from os import path
@@ -34,6 +35,7 @@ def get_regular_session():
     return session
 
 def init(df, number_of_records, timeout): 
+    print("number_of_records:", number_of_records)
     tor_session = get_tor_session()
     reg_session = get_regular_session()
 	
@@ -94,7 +96,8 @@ def make_requests(tor_session, reg_session, df, num_of_records, timeout) :
     df = df.sample(frac=1)
     for url in df["Domain"][0:num_of_records]: 
         count+=1
-        print("\ncount:", count)
+        print("\n\ncount:", count)
+        print("num_of_records:", num_of_records)
         full_url="http://"+url
         print("url:", url)
         try:
@@ -383,109 +386,46 @@ def write_image(fig, filename):
     fig.write_image(path)
 
 
-def handle_args():
-    usage_err_msg = """\n ARGUMENTS ERROR \n\n 
-    usage:  \n 
-    'python tor_visualization.py --resume true' will load data from previous run and visualize the data on the world map \n \n  
-    'python tor_visualization.py --test_size 100' will run the tor network speed tests on 100 different webservers \n \n 
-    'python tor_visualization.py --save true' will save the graph to a file \n \n 
-    'python tor_visualization.py --outfile mygraph.png' will save the graph to a file called  mygraph.png  \n \n 
-    'python tor_visualization.py --display false' will prevent the visualization from being hosted on localhost \n \n 
-    'python tor_visualization.py --resume true --mode dead_zones' will display the zones where the Tor network could not connect to a server \n \n
-    'python tor_visualization.py --resume true --mode dead_zone_ratios' will display the ratio of connections to dropped connections per region\n \n
-    'python tor_visualization.py --timeout 50' set a timeout of 50 seconds on the requests \n\n
-    """ 
-    arguments = len(sys.argv) - 1
-    print("arguments:", arguments)
-    arg_dict = {}
-    if( arguments % 2 != 0):
-        print(usage_err_msg)
-        exit(0)
-    
-    # output argument-wise
-    key_index = 1
-    while (arguments >= key_index):
-        print("parameter %i: %s" % (key_index, sys.argv[key_index]))
-        value_index = key_index + 1
-        print("parameter %i: %s" % (value_index, sys.argv[value_index]))
-        arg_dict[sys.argv[key_index]] = sys.argv[value_index]
-        key_index = key_index + 2
 
-    return arg_dict
 
 
 '''
 usage:   
-    'python tor_visualization.py --resume true' will load data from previous run and visualize the data on the world map 
+    'python tor_visualization.py --resume True' will load data from previous run and visualize the data on the world map 
     'python tor_visualization.py --test_size 100' will run the tor network speed tests on 100 different webservers 
-    'python tor_visualization.py --save true' will save the graph to a file 
+    'python tor_visualization.py --save True' will save the graph to a file 
     'python tor_visualization.py --outfile mygraph.png' will save the graph to a file called  mygraph.png 
-    'python tor_visualization.py --display false will prevent the visualization from being hosted on localhost 
-    'python tor_visualization.py --resume true --mode dead_zones'
-    'python tor_visualization.py --resume true --mode dead_zone_ratios' will display the ratio of connections to dropped connections per region
+    'python tor_visualization.py --display False will prevent the visualization from being hosted on localhost 
+    'python tor_visualization.py --resume True --mode dead_zones'
+    'python tor_visualization.py --resume True --mode dead_zone_ratios' will display the ratio of connections to dropped connections per region
     'python tor_visualization.py --timeout 50' set a timeout of 50 seconds on the requests
 '''
 
 if __name__ == '__main__':
-    arg_dict = handle_args()
-    print("arg_dict")
-    print(arg_dict)
-
-    #default arguments
-    output_filename = 'map_data.csv'
-    resume = False
-    test_size = 50
-    display = True
-    save = False
-    outfile = "tor_map.png"
-    timeout=200
+    config, unparsed = get_tv_config()
     
-    
-    if '--resume' in arg_dict:
-        if(arg_dict['--resume'] == 'true'):
-            resume = True
-            df = read_data(output_filename) 
+    if config.resume:
+        df = read_data(config.output_filename) 
 
-    if '--test_size' in arg_dict:
-        if(arg_dict['--test_size'].isdigit()):
-            test_size = int(arg_dict['--test_size'])
-
-    if '--timeout' in arg_dict:
-        if(arg_dict['--timeout'].isdigit()):
-            timeout = int(arg_dict['--test_size'])
-
-    if resume == False:
+    if config.resume == False:
         df = get_data()
-        df = init(df, test_size, timeout)
-        print("final data")
-        print(df)
-        print(df.columns)
-        write_csv(df, output_filename)
+        df = init(df, config.test_size, config.timeout)
+        #print("final data")
+        #print(df)
+        #print(df.columns)
+        write_csv(df, config.output_filename)
 
     fig = map_viz(df)
-    if '--mode' in arg_dict:
-        if(arg_dict['--mode'] == 'dead_zones'):
-            fig = dead_zones_viz(df)
-        if(arg_dict['--mode'] == 'dead_zone_ratios'):
-            fig = dead_zone_ratios_viz(df)
+    if(config.mode == 'dead_zones'):
+        fig = dead_zones_viz(df)
+    if(config.mode == 'dead_zone_ratios'):
+        fig = dead_zone_ratios_viz(df)
 
-    if '--display' in arg_dict:
-        if(arg_dict['--display'] == 'false'):
-            display = False
-
-    if '--save' in arg_dict:
-        if(arg_dict['--save'] == 'true'):
-            save = True
-
-    if '--outfile' in arg_dict:
-        outfile = arg_dict['--outfile']
-        save = True
-
-    if display==True:
+    if config.display==True:
         fig.show()
 
-    if save==True:
-        write_image(fig, outfile)
+    if config.save==True:
+        write_image(fig, config.outfile)
 
 
 

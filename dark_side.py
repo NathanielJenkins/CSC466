@@ -89,7 +89,7 @@ def call_onion_hub():
     return onion_links
 
 
-def dark_crawl(fetch_size=50, timeout=300):
+def dark_crawl(test_size=50, timeout=300):
 
         onion_hub_links = call_onion_hub()
         print("len(onion_hub_links):", len(onion_hub_links))
@@ -100,14 +100,14 @@ def dark_crawl(fetch_size=50, timeout=300):
         #links = random.shuffle(onion_links)
         print(onion_hub_links)
         total_amount = len(onion_hub_links)
-        if fetch_size == -1:
-            fetch_size = total_amount
+        if test_size == -1:
+            test_size = total_amount
 
         count = -1
-        for web_url in onion_hub_links[0:fetch_size]:
+        for web_url in onion_hub_links[0:test_size]:
             count += 1
             print("count:", count)
-            print("fetch_size:", fetch_size)
+            print("test_size:", test_size)
             print("total_amount:", total_amount)
             try: 
                 full_url = "http://"+web_url+"/"
@@ -225,51 +225,19 @@ def wipe_data():
         shutil.rmtree(html_folder)
 
 
-def handle_args():
-    usage_err_msg = """\n ARGUMENTS ERROR \n\n 
-    usage:  \n 
-    'python dark_side.py --resume false' fetch new data to graph \n \n  
-    'python dark_side.py --test_size 100' will plot x amount of the results from different .onion sites \n \n 
-    'python dark_side.py --save true' will save the graph to a file \n \n 
-    'python dark_side.py --outfile mygraph.png' will save the graph to a file called  mygraph.png  \n \n 
-    'python dark_side.py --display false' will prevent the visualization from being hosted on localhost \n \n 
-    'python dark_side.py --mode lines' will display the results on a line plot \n \n
-    'python dark_side.py --clear true' will clear all the stored data \n \n
-    'python dark_side.py --fetch_all true' will crawl all the ~550 .onion sites \n \n
-    'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites \n \n
-    'python dark_side.py --timeout 100' will set the timeout for the request to 100 seconds \n \n
-    """ 
-    arguments = len(sys.argv) - 1
-    print("arguments:", arguments)
-    arg_dict = {}
-    if( arguments % 2 != 0 ):
-        print(usage_err_msg)
-        exit(0)
-    
-    # output argument-wise
-    key_index = 1
-    while (arguments >= key_index):
-        print("parameter %i: %s" % (key_index, sys.argv[key_index]))
-        value_index = key_index + 1
-        print("parameter %i: %s" % (value_index, sys.argv[value_index]))
-        arg_dict[sys.argv[key_index]] = sys.argv[value_index]
-        key_index = key_index + 2
-
-    return arg_dict
-
 
 
 """
 usage:  
-'python dark_side.py --resume true' fetch new data to graph
+'python dark_side.py --resume True' fetch new data to graph
 'python dark_side.py --test_size 100' will plot x amount of the results from different .onion sites 
-'python dark_side.py --save true' will save the graph to a file
+'python dark_side.py --save True' will save the graph to a file
 'python dark_side.py --outfile mygraph.png' will save the graph to a file called  mygraph.png 
-'python dark_side.py --display false' will prevent the visualization from being hosted on localhost
-'python dark_side.py --resume true --mode line_plot' will display the results on a line_plot
+'python dark_side.py --display False' will prevent the visualization from being hosted on localhost
+'python dark_side.py --resume True --mode line_plot' will display the results on a line_plot
 'python dark_side.py --mode lines' will display the results on a line plot 
-'python dark_side.py --clear true' will clear all the stored data
-'python dark_side.py --fetch_all true' will fetch all onion links
+'python dark_side.py --clear True' will clear all the stored data
+'python dark_side.py --fetch_all True' will fetch all onion links
 'python dark_side.py --mode all' will plot the request speeds to all the .onion site in the metrics.log and not just a sample of the sites
 'python dark_side.py --timeout 100' will set the timeout for the request to 100 seconds
 """ 
@@ -285,12 +253,12 @@ if __name__=='__main__':
 
     print("config.fetch_all:", config.fetch_all)
     if config.fetch_all:
-        config.fetch_size = -1
+        config.test_size = -1
         config.resume = False
 
     if not config.resume:
         init_stem()
-        dark_crawl(config.fetch_size, config.timeout)
+        dark_crawl(config.test_size, config.timeout)
 
     metrics = analyze_results()
     metrics = metrics.split("~")
